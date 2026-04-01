@@ -1,55 +1,437 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我的第一个网页</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>零号大坝</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fb;
+      min-height: 100vh;
+      background: #e6e6e6;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1400px;
+      padding: 32px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: 2px;
       color: #333;
+    }
+
+    .control-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .dam-btn {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 16px 34px;
+      font-size: 26px;
+      font-weight: 800;
+      border-radius: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, #2b3a67, #4d648d);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      user-select: none;
+    }
+
+    .dam-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 22px rgba(0, 0, 0, 0.22);
+      filter: brightness(1.05);
+    }
+
+    .dam-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .tip {
+      font-size: 15px;
+      color: #555;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .cards-wrap {
+      width: 100%;
+      min-height: 270px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 8px;
+    }
+
+    .cards-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 18px;
+      flex-wrap: nowrap;
+      min-height: 240px;
+    }
+
+    .card {
+      width: 170px;
+      height: 230px;
+      position: relative;
+      perspective: 1000px;
+      cursor: pointer;
+      user-select: none;
+      animation: dealIn 0.35s ease;
+    }
+
+    @keyframes dealIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.45s ease;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      backface-visibility: hidden;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .card-back {
+      border: 4px solid #22304e;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 30%),
+        linear-gradient(135deg, #304878 0%, #17233c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .card-back::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 2px solid rgba(255,255,255,0.28);
+      border-radius: 12px;
+    }
+
+    .card-back-text {
+      color: #f3f5ff;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      border: 4px solid var(--card-border, #444);
+      background: var(--card-bg, #fff);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-top {
+      padding: 10px 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-rarity {
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(0,0,0,0.6);
+      background: rgba(255,255,255,0.55);
+      border-radius: 999px;
+      padding: 4px 8px;
+      backdrop-filter: blur(2px);
+      white-space: nowrap;
+    }
+
+    .card-rate {
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(0,0,0,0.65);
+      white-space: nowrap;
+    }
+
+    .card-image-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+    }
+
+    .card-image {
+      width: 104px;
+      height: 104px;
+      object-fit: contain;
+      filter: drop-shadow(0 5px 8px rgba(0,0,0,0.15));
+    }
+
+    .card-bottom {
+      padding: 0 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-name {
+      margin: 0;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: #1b1b1b;
+      line-height: 1.2;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+    }
+
+    .card-desc {
+      margin: 0;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(0,0,0,0.68);
+      line-height: 1.45;
+      min-height: 34px;
+    }
+
+    .empty-text {
+      margin-top: 28px;
+      font-size: 18px;
+      color: #666;
+      font-weight: 700;
       text-align: center;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 100px auto;
-      padding: 20px;
-    }
+    @media (max-width: 900px) {
+      .cards-wrap {
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
 
-    h1 {
-      color: #2c7be5;
-      font-size: 42px;
-    }
-
-    p {
-      font-size: 20px;
-      line-height: 1.8;
-    }
-
-    .btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 24px;
-      background: #2c7be5;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-    }
-
-    .btn:hover {
-      background: #1a5fc4;
+      .cards-row {
+        min-width: max-content;
+        padding: 0 6px 8px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>欢迎来到我的网页</h1>
-    <p>这是我在 GitHub 上创建的第一个网页。</p>
-    <p>以后我可以继续添加图片、简介、联系方式和更多内容。</p>
-    <a class="btn" href="#">了解更多</a>
+  <div class="page">
+    <h1 class="title">零号大坝</h1>
+
+    <div class="control-area">
+      <button id="drawBtn" class="dam-btn">零号大坝</button>
+      <div class="tip">
+        点击按钮生成卡牌。<br />
+        卡牌初始为背面，点击一次翻面，再点击一次消失。
+      </div>
+    </div>
+
+    <div class="cards-wrap">
+      <div id="cardsRow" class="cards-row"></div>
+    </div>
   </div>
+
+  <script>
+    const cardsRow = document.getElementById("cardsRow");
+    const drawBtn = document.getElementById("drawBtn");
+
+    const CARD_POOL = [
+      { name: "垃圾桶", weight: 25, color: "#b7c2cc", border: "#5f6e7a", rarity: "常见", icon: "🗑️", desc: "随处可见的普通容器。" },
+      { name: "抽屉柜", weight: 14, color: "#d6c5b4", border: "#8b6b52", rarity: "常见", icon: "🗄️", desc: "常用于存放零碎物品。" },
+      { name: "手提箱", weight: 10, color: "#d8b68a", border: "#8f5a2c", rarity: "普通", icon: "💼", desc: "携带方便的小型容器。" },
+      { name: "高级行李箱", weight: 10, color: "#b59ddb", border: "#5d3b9d", rarity: "普通", icon: "🧳", desc: "材质更好，外观更精致。" },
+      { name: "电脑机箱", weight: 8, color: "#b8c1d1", border: "#3d4b63", rarity: "普通", icon: "🖥️", desc: "可能藏有电子设备相关物资。" },
+      { name: "武器箱", weight: 5, color: "#e0b366", border: "#8a5b14", rarity: "稀有", icon: "🔫", desc: "坚固厚重的战术容器。" },
+      { name: "航空储物箱", weight: 3, color: "#91c4d8", border: "#2d6f87", rarity: "稀有", icon: "🛩️", desc: "用于特殊运输的储物箱。" },
+      { name: "快递箱", weight: 9, color: "#e4c28f", border: "#9b6b2b", rarity: "普通", icon: "📦", desc: "标准规格的运输纸箱。" },
+      { name: "医疗物资堆", weight: 3, color: "#b6e4c4", border: "#2d8a53", rarity: "稀有", icon: "🩺", desc: "包含医疗用品的整包物资。" },
+      { name: "电脑", weight: 1.5, color: "#b4d4e7", border: "#2e6a89", rarity: "珍贵", icon: "💻", desc: "完整设备，价值较高。" },
+      { name: "小保险箱", weight: 1.5, color: "#c8ced8", border: "#4e5969", rarity: "珍贵", icon: "🔐", desc: "体积不大，但防护不错。" },
+      { name: "服务器", weight: 1.5, color: "#a7c0de", border: "#355c8a", rarity: "珍贵", icon: "🖧", desc: "数据设备，较为少见。" },
+      { name: "大保险箱", weight: 0.5, color: "#d4d7dc", border: "#3d4652", rarity: "史诗", icon: "🧱", desc: "极少见的厚重保险设备。" },
+      { name: "鸟窝", weight: 8, color: "#dbc3a0", border: "#8a5c2f", rarity: "普通", icon: "🪺", desc: "意外出现的自然巢居点。" }
+    ];
+
+    function createSvgDataUrl(icon, bg1, bg2) {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+          </defs>
+          <rect x="10" y="10" rx="28" ry="28" width="200" height="200" fill="url(#g)" />
+          <circle cx="110" cy="90" r="54" fill="rgba(255,255,255,0.22)" />
+          <text x="110" y="124" text-anchor="middle" font-size="72" font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif">${icon}</text>
+        </svg>
+      `.trim();
+
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    CARD_POOL.forEach(card => {
+      const colorPair = getGradientFromColor(card.color);
+      card.image = createSvgDataUrl(card.icon, colorPair[0], colorPair[1]);
+    });
+
+    function getGradientFromColor(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      const lighter = `rgb(${clamp(r + 28)}, ${clamp(g + 28)}, ${clamp(b + 28)})`;
+      const darker = `rgb(${clamp(r - 18)}, ${clamp(g - 18)}, ${clamp(b - 18)})`;
+      return [lighter, darker];
+    }
+
+    function hexToRgb(hex) {
+      const value = hex.replace("#", "");
+      const full = value.length === 3
+        ? value.split("").map(ch => ch + ch).join("")
+        : value;
+
+      const num = parseInt(full, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    function clamp(v) {
+      return Math.max(0, Math.min(255, v));
+    }
+
+    function getCardCount() {
+      const roll = Math.random() * 100;
+      if (roll < 25) return 2;
+      if (roll < 40) return 3;
+      return 4;
+    }
+
+    function weightedPick(pool) {
+      const total = pool.reduce((sum, item) => sum + item.weight, 0);
+      let roll = Math.random() * total;
+
+      for (const item of pool) {
+        roll -= item.weight;
+        if (roll <= 0) return item;
+      }
+
+      return pool[pool.length - 1];
+    }
+
+    function clearCards() {
+      cardsRow.innerHTML = "";
+    }
+
+    function renderCards(cards) {
+      clearCards();
+
+      cards.forEach(cardData => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.state = "back";
+
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-face card-back">
+              <div class="card-back-text">卡背</div>
+            </div>
+            <div
+              class="card-face card-front"
+              style="--card-bg:${cardData.color}; --card-border:${cardData.border};"
+            >
+              <div class="card-top">
+                <span class="card-rarity">${cardData.rarity}</span>
+                <span class="card-rate">${cardData.weight}%</span>
+              </div>
+
+              <div class="card-image-wrap">
+                <img class="card-image" src="${cardData.image}" alt="${cardData.name}">
+              </div>
+
+              <div class="card-bottom">
+                <h3 class="card-name">${cardData.name}</h3>
+                <p class="card-desc">${cardData.desc}</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          const state = card.dataset.state;
+
+          if (state === "back") {
+            card.dataset.state = "front";
+            card.classList.add("flipped");
+          } else {
+            card.remove();
+          }
+        });
+
+        cardsRow.appendChild(card);
+      });
+    }
+
+    function drawCards() {
+      const count = getCardCount();
+      const result = [];
+
+      for (let i = 0; i < count; i++) {
+        result.push(weightedPick(CARD_POOL));
+      }
+
+      renderCards(result);
+    }
+
+    drawBtn.addEventListener("click", drawCards);
+  </script>
 </body>
 </html>
