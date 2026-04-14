@@ -332,7 +332,7 @@
       </div>
       <div class="tip">
         点击按钮生成卡牌。<br />
-        点击卡牌翻开，两张匹配后消除。
+        点击背面翻开，点击正面直接删除。
       </div>
     </div>
 
@@ -360,8 +360,6 @@
     const inventoryList = document.getElementById("inventoryList");
 
     const inventoryMap = new Map();
-    let openedCards = [];
-    let isResolvingPair = false;
     let audioCtx;
 
     const CARD_POOL = [
@@ -481,8 +479,6 @@
 
     function clearCards() {
       cardsRow.innerHTML = "";
-      openedCards = [];
-      isResolvingPair = false;
     }
 
     function updateInventory(cards) {
@@ -515,35 +511,17 @@
     }
 
     function handleCardClick(card) {
-      if (isResolvingPair) return;
-      if (card.dataset.state !== "back") return;
+      if (card.dataset.state === "back") {
+        card.dataset.state = "front";
+        card.classList.add("flipped");
+        playFlipSound();
+        return;
+      }
 
-      card.dataset.state = "front";
-      card.classList.add("flipped");
-      openedCards.push(card);
-      playFlipSound();
-
-      if (openedCards.length < 2) return;
-
-      const [first, second] = openedCards;
-      const matched = first.dataset.name === second.dataset.name;
-      isResolvingPair = true;
-
-      setTimeout(() => {
-        if (matched) {
-          first.remove();
-          second.remove();
-          playEliminateSound();
-        } else {
-          [first, second].forEach(item => {
-            item.dataset.state = "back";
-            item.classList.remove("flipped");
-          });
-        }
-
-        openedCards = [];
-        isResolvingPair = false;
-      }, 360);
+      if (card.dataset.state === "front") {
+        card.remove();
+        playEliminateSound();
+      }
     }
 
     function renderCards(cards) {
