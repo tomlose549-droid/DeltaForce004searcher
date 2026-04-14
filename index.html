@@ -111,6 +111,11 @@
       animation: dealIn 0.35s ease;
     }
 
+    .card.removing {
+      pointer-events: none;
+      animation: cardRemove 0.45s ease forwards;
+    }
+
     @keyframes dealIn {
       from {
         opacity: 0;
@@ -119,6 +124,47 @@
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes cardRemove {
+      0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.68) rotate(-7deg);
+        filter: brightness(1.35);
+      }
+    }
+
+    .remove-particle-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    .remove-particle {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0.95;
+      animation: burstOut 0.55s ease-out forwards;
+    }
+
+    @keyframes burstOut {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.95;
+      }
+      100% {
+        transform: translate3d(var(--dx), var(--dy), 0) scale(0.2);
+        opacity: 0;
       }
     }
 
@@ -405,6 +451,70 @@
       playTone(520, 0.08, "triangle", 0.045);
     }
 
+    function playRemoveSound() {
+      ensureAudioContext();
+      const steps = [
+        { freq: 780, duration: 0.08, delay: 0, type: "square", gain: 0.04 },
+        { freq: 610, duration: 0.1, delay: 0.05, type: "triangle", gain: 0.045 },
+        { freq: 430, duration: 0.15, delay: 0.12, type: "sawtooth", gain: 0.035 }
+      ];
+
+      steps.forEach(step => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = step.type;
+        osc.frequency.value = step.freq;
+        g.gain.value = step.gain;
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        const startAt = audioCtx.currentTime + step.delay;
+        osc.start(startAt);
+        osc.stop(startAt + step.duration);
+      });
+    }
+
+    function createRemoveParticles(cardEl) {
+      const rect = cardEl.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const colors = ["#ffe482", "#9ad8ff", "#fff", "#f9a8ff", "#6ce5aa"];
+
+      const layer = document.createElement("div");
+      layer.className = "remove-particle-layer";
+      document.body.appendChild(layer);
+
+      for (let i = 0; i < 26; i++) {
+        const p = document.createElement("span");
+        const angle = (Math.PI * 2 * i) / 26 + (Math.random() - 0.5) * 0.28;
+        const distance = 50 + Math.random() * 88;
+        const size = 4 + Math.random() * 7;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance - Math.random() * 22;
+        p.className = "remove-particle";
+        p.style.left = `${centerX - size / 2}px`;
+        p.style.top = `${centerY - size / 2}px`;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.background = colors[(Math.random() * colors.length) | 0];
+        p.style.setProperty("--dx", `${dx.toFixed(1)}px`);
+        p.style.setProperty("--dy", `${dy.toFixed(1)}px`);
+        layer.appendChild(p);
+      }
+
+      window.setTimeout(() => layer.remove(), 620);
+    }
+
+    function removeCardWithEffect(card) {
+      if (card.classList.contains("removing")) return;
+      card.classList.add("removing");
+      createRemoveParticles(card);
+      playRemoveSound();
+      window.setTimeout(() => {
+        card.dataset.state = "removed";
+        card.remove();
+      }, 430);
+    }
+
     function createSvgDataUrl(icon, bg1, bg2) {
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
@@ -514,8 +624,7 @@
       }
 
       if (card.dataset.state === "front") {
-        card.dataset.state = "removed";
-        card.remove();
+        removeCardWithEffect(card);
       }
     }
 
