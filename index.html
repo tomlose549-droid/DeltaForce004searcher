@@ -506,11 +506,17 @@
     }
 
     function handleCardClick(card) {
-      if (card.dataset.state !== "back") return;
+      if (card.dataset.state === "back") {
+        card.dataset.state = "front";
+        card.classList.add("flipped");
+        playFlipSound();
+        return;
+      }
 
-      card.dataset.state = "front";
-      card.classList.add("flipped");
-      playFlipSound();
+      if (card.dataset.state === "front") {
+        card.dataset.state = "removed";
+        card.remove();
+      }
     }
 
     function renderCards(cards) {
